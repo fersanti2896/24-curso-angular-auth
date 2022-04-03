@@ -2,6 +2,7 @@
 /* Haciendo tipado */
 const { response } = require('express');
 const Usuario = require('../models/Usuario');
+const bcrypt = require('bcryptjs');
 
 /* Controladores de rutas */
 const crearUsuario = async( req, res = response ) => {
@@ -19,11 +20,14 @@ const crearUsuario = async( req, res = response ) => {
         }
 
         /* Crear el usuario con el modelo */
-        dbUser = new Usuario(req.body);
+        dbUser = new Usuario( req.body );
 
         /* Encriptar - Hashear password */
+        const salt = bcrypt.genSaltSync();
+        dbUser.password = bcrypt.hashSync( password, salt );
+
         /* Generando JWT para que se mande en Front como autenticación */
-        
+
         /* Crear el usuario en la BD */
         await dbUser.save();
 
