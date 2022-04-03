@@ -3,6 +3,7 @@
 const { response } = require('express');
 const Usuario = require('../models/Usuario');
 const bcrypt = require('bcryptjs');
+const { generarJWT } = require('../helpers/jwt');
 
 /* Controladores de rutas */
 const crearUsuario = async( req, res = response ) => {
@@ -27,6 +28,7 @@ const crearUsuario = async( req, res = response ) => {
         dbUser.password = bcrypt.hashSync( password, salt );
 
         /* Generando JWT para que se mande en Front como autenticación */
+        const token = await generarJWT( dbUser.id, dbUser.name );
 
         /* Crear el usuario en la BD */
         await dbUser.save();
@@ -35,15 +37,17 @@ const crearUsuario = async( req, res = response ) => {
         return res.status(201).json({
             ok: true,
             uid: dbUser.id,
-            name: name
+            name: name, 
+            token
         });
 
-    } catch (error) {}
-        console.log(error)
+    } catch (error) {
+        console.log(error);
         return res.status(500).json({
             ok : false,
             msg: 'Por favor hable con el administrador'
         });
+    }  
 }
 
 const loginUsuario = ( req, res = response ) => {
